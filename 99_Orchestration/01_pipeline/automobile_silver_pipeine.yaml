@@ -1,0 +1,83 @@
+resources:
+  jobs:
+    automobile_silver_pipeline:
+      name: automobile_silver_pipeline
+      tasks:
+        - task_key: automobile_silver_trn_customer_survey
+          notebook_task:
+            notebook_path: /Workspace/automobile_reports/automobile/02_silver/01_notebook/nb_trn_customer_cusrvey
+            source: WORKSPACE
+          timeout_seconds: 3000
+          health:
+            rules:
+              - metric: RUN_DURATION_SECONDS
+                op: GREATER_THAN
+                value: 2400
+        - task_key: automobile_silver_trn_estimate
+          depends_on:
+            - task_key: automobile_silver_trn_customer_survey
+          run_if: ALL_DONE
+          notebook_task:
+            notebook_path: /Workspace/automobile_reports/automobile/02_silver/01_notebook/nb_trn_estimate
+            source: WORKSPACE
+          timeout_seconds: 3000
+          health:
+            rules:
+              - metric: RUN_DURATION_SECONDS
+                op: GREATER_THAN
+                value: 2700
+        - task_key: automobile_silver_trn_invoice
+          depends_on:
+            - task_key: automobile_silver_trn_estimate
+          run_if: ALL_DONE
+          notebook_task:
+            notebook_path: /Workspace/automobile_reports/automobile/02_silver/01_notebook/nb_trn_invoice
+            source: WORKSPACE
+          timeout_seconds: 3000
+          health:
+            rules:
+              - metric: RUN_DURATION_SECONDS
+                op: GREATER_THAN
+                value: 2700
+        - task_key: automobile_silver_trn_budget
+          depends_on:
+            - task_key: automobile_silver_trn_invoice
+          run_if: ALL_DONE
+          notebook_task:
+            notebook_path: /Workspace/automobile_reports/automobile/02_silver/01_notebook/nb_trn_ns_budget
+            source: WORKSPACE
+          timeout_seconds: 3000
+          health:
+            rules:
+              - metric: RUN_DURATION_SECONDS
+                op: GREATER_THAN
+                value: 2700
+        - task_key: automobile_silver_trn_order
+          depends_on:
+            - task_key: automobile_silver_trn_budget
+          run_if: ALL_DONE
+          notebook_task:
+            notebook_path: /Workspace/automobile_reports/automobile/02_silver/01_notebook/nb_trn_order
+            source: WORKSPACE
+          timeout_seconds: 3000
+          health:
+            rules:
+              - metric: RUN_DURATION_SECONDS
+                op: GREATER_THAN
+                value: 2700
+        - task_key: automobile_silver_trn_store
+          depends_on:
+            - task_key: automobile_silver_trn_order
+          run_if: ALL_DONE
+          notebook_task:
+            notebook_path: /Workspace/automobile_reports/automobile/02_silver/01_notebook/nb_trn_store
+            source: WORKSPACE
+          timeout_seconds: 2700
+          health:
+            rules:
+              - metric: RUN_DURATION_SECONDS
+                op: GREATER_THAN
+                value: 1800
+      queue:
+        enabled: true
+      performance_target: PERFORMANCE_OPTIMIZED

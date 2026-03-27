@@ -1,0 +1,43 @@
+resources:
+  jobs:
+    automobile_gold_pipeline:
+      name: automobile_gold_pipeline
+      tasks:
+        - task_key: automobile_gold_dimtable
+          notebook_task:
+            notebook_path: /Workspace/automobile_reports/automobile/03_gold/01_notebook/nb_dim_table_creation
+            source: WORKSPACE
+          timeout_seconds: 2700
+          health:
+            rules:
+              - metric: RUN_DURATION_SECONDS
+                op: GREATER_THAN
+                value: 1800
+        - task_key: automobile_gold_facttable
+          depends_on:
+            - task_key: automobile_gold_dimtable
+          run_if: ALL_DONE
+          notebook_task:
+            notebook_path: /Workspace/automobile_reports/automobile/03_gold/01_notebook/nb_fact_table_creation
+            source: WORKSPACE
+          timeout_seconds: 2700
+          health:
+            rules:
+              - metric: RUN_DURATION_SECONDS
+                op: GREATER_THAN
+                value: 1800
+        - task_key: automobile_gold_curated_kpi
+          depends_on:
+            - task_key: automobile_gold_facttable
+          notebook_task:
+            notebook_path: /Workspace/automobile_reports/automobile/03_gold/01_notebook/nb_curated_kpi
+            source: WORKSPACE
+          timeout_seconds: 5400
+          health:
+            rules:
+              - metric: RUN_DURATION_SECONDS
+                op: GREATER_THAN
+                value: 3600
+      queue:
+        enabled: true
+      performance_target: PERFORMANCE_OPTIMIZED

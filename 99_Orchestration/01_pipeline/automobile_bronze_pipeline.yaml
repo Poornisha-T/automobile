@@ -1,0 +1,21 @@
+resources:
+  jobs:
+    automobile_bronze_pipeline:
+      name: automobile_bronze_pipeline
+      tasks:
+        - task_key: automobile_bronze_ingestion
+          notebook_task:
+            notebook_path: /Workspace/automobile_reports/automobile/01_bronze/01_notebook/nb_bronze
+            source: WORKSPACE
+          timeout_seconds: 2700
+          health:
+            rules:
+              - metric: RUN_DURATION_SECONDS
+                op: GREATER_THAN
+                value: 1800
+          email_notifications:
+            on_failure:
+              - poornishadurai@gmail.com
+      queue:
+        enabled: true
+      performance_target: PERFORMANCE_OPTIMIZED
